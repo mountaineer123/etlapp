@@ -57,13 +57,14 @@ public class ETLImpl implements ETL {
     public Path getUploadedPATH() { return uploadedPATH; }
 
 
+    // Downloads a DataSet by Type (eg. zip file) from S3
     @Override
     public void downloadDataSet(String archiveType) throws IOException {
         logger.info("*** Downloading dataset ***");
         this.s3BucketClient.downloadObjectByType(archiveType);
     }
 
-    // Unzips csv files and extracts as per filter
+    // Filters every File Object in Archive by Criteria
     @Override
     public void extractByFilter(Predicate<String> filter) throws IOException {
         logger.info("*** Performing Extraction ***");
@@ -75,6 +76,29 @@ public class ETLImpl implements ETL {
         } catch (IOException | DirectoryIteratorException e) {
             logger.error(e.getMessage());
         }
+    }
+
+    // Transforms every File Object in Archive using collaborator Converter
+    @Override
+    public void transform() {
+        logger.info("*** Performing Transforms ***");
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(extractedPATH)) {
+            for (Path streamItem: stream) {
+                File extractedFile = new File(streamItem.toString());
+                logger.info("Transforming " + extractedFile.toString());
+                String filename = this.getFileNamePrefix(extractedFile);
+                File transformedFile = this.getTargetFile(filename, true);
+                this.converter.convert(extractedFile,transformedFile);
+            }
+        } catch (IOException | DirectoryIteratorException | CsvException e) {
+            logger.error(e.getMessage());
+        }
+    }
+
+    // (Up)Loads Transformed (parquet) files to S3
+    @Override
+    public void load(String type) {
+        this.s3BucketClient.uploadObjectByType(type);
     }
 
     private void extractFileByFilter(Path file, Predicate<String> filter) throws IOException {
@@ -145,27 +169,6 @@ public class ETLImpl implements ETL {
             logger.error(e.getMessage());
         }
     }
-
-    public void transform() {
-        logger.info("*** Performing Transforms ***");
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(extractedPATH)) {
-            for (Path streamItem: stream) {
-                File extractedFile = new File(streamItem.toString());
-                logger.info("Transforming " + extractedFile.toString());
-                String filename = this.getFileNamePrefix(extractedFile);
-                File transformedFile = this.getTargetFile(filename, true);
-                this.converter.convert(extractedFile,transformedFile);
-            }
-        } catch (IOException | DirectoryIteratorException | CsvException e) {
-            logger.error(e.getMessage());
-        }
-    }
-
-    @Override
-    public void load(String type) {
-        this.s3BucketClient.uploadObjectByType(type);
-    }
-
 
     private String getFileNamePrefix(File file) {
         return file.getName().substring(0, file.getName().indexOf("."));

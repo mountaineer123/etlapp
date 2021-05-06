@@ -26,10 +26,10 @@ public class App {
         String searchString = args[1];
         logger.info("searchString " + searchString);
 
-        // Initializes ETL engine, injecting with S3BucketClient and CSVParquetConverter
+        // Initializes ETL engine, injecting it with S3BucketClient and CSVParquetConverter
         ETL etlEngine = new ETLImpl(new S3BucketClientImpl(REGION, bucketName), new CSVParquetConverter());
 
-        // Downloads an Archive Object by Type (eg. zip file) from S3
+        // Downloads a DataSet by Type (eg. zip file) from S3
         etlEngine.downloadDataSet(ARCHIVE_TYPE);
 
         // Extracts every File Object in Archive by Filter
@@ -38,13 +38,7 @@ public class App {
         // Transforms Extracted as per injected Converter
         etlEngine.transform();
 
-
-        // 6. Upload Parquet files to S3 Bucket
-        // 6a. List parquet files under folder
-        // 6b. Upload file found
-        //File parquetFile = new File();
-        //s3BucketClient.uploadObject(s3, parquetFile);
-        //etlEngine.load();
+        // (Up)Loads Transformed (parquet) files to S3
         etlEngine.load(TARGET_TYPE);
 
     }

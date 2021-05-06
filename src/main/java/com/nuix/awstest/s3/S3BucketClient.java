@@ -12,6 +12,7 @@ public interface S3BucketClient {
     // Downloads an Object by Type from S3
     void downloadObjectByType(String type) throws IOException;
 
+    // Uploads an Object by Type to S3
     void uploadObjectByType(String type);
 
     void setDownloadLocation(Path location);

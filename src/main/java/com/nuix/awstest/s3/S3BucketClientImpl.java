@@ -92,8 +92,6 @@ public class S3BucketClientImpl implements S3BucketClient {
     }
 
     private List<S3Object> listBucketObjects() {
-
-
         try {
             ListObjectsRequest listObjects = ListObjectsRequest
                     .builder()
