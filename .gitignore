@@ -23,7 +23,5 @@
 hs_err_pid*
 /etlapp.iml
 /.idea
-/src/main/resources/util/
-/src/main/java/com/nuix/awstest/pg/
 /.idea/
 /target/
