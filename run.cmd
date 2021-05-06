@@ -1,1 +1,1 @@
-mvn clean package & mvn exec:java -Dexec.mainClass="com.nuix.awstest.App" -Dexec.args="candidate-20-s3-bucket ellipsis"
+mvn clean package exec:java -Dexec.mainClass="com.nuix.awstest.App" -Dexec.args="candidate-20-s3-bucket ellipsis"
