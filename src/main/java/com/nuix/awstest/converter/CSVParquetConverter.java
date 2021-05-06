@@ -26,25 +26,33 @@ public class CSVParquetConverter implements Converter {
 
     private void convertCsvToParquet(File sourceFile, File targetFile, boolean enableDictionary) throws IOException, CsvException {
         logger.info("Converting " + sourceFile.getName() + " to " + targetFile.getName());
-        String rawSchema = this.getSchema(sourceFile);
-        if(targetFile.exists()) {
-            throw new IOException("Output file " + targetFile.getAbsolutePath() +
-                    " already exists");
-        }
-
-        Path path = new Path(targetFile.toURI());
-
-        MessageType schema = MessageTypeParser.parseMessageType(rawSchema);
-        CustomParquetWriter writer = new CustomParquetWriter(path, schema, false, CompressionCodecName.SNAPPY);
-
         CSVReader csvReader = new CSVReader(new FileReader(sourceFile));
-        List<String[]> entries = csvReader.readAll();
-
         try {
-            for(String[] fields: entries) {
-                writer.write(Arrays.asList(fields));
+
+            List<String[]> entries = csvReader.readAll();
+
+            // Only continue if CSV extracted has found records
+            if(entries.size() > 0) {
+
+                String rawSchema = this.getSchema(sourceFile);
+                if (targetFile.exists()) {
+                    throw new IOException("Output file " + targetFile.getAbsolutePath() +
+                            " already exists");
+                }
+
+                Path path = new Path(targetFile.toURI());
+
+                MessageType schema = MessageTypeParser.parseMessageType(rawSchema);
+                CustomParquetWriter writer = new CustomParquetWriter(path, schema, false, CompressionCodecName.SNAPPY);
+
+
+                for(String[] fields: entries) {
+                    writer.write(Arrays.asList(fields));
+                }
+                writer.close();
+
+
             }
-            writer.close();
         } finally {
             this.closeResource(csvReader);
         }
