@@ -1,0 +1,1 @@
+message schema { optional binary column0 (UTF8); optional binary column1 (UTF8); optional binary column2 (UTF8); optional binary column3 (UTF8); optional binary column4 (UTF8); }
